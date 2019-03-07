@@ -35,22 +35,6 @@ class Users extends CI_Model
 		return $this->db->query($this->config->item("getUserEmail"), array("candrescastilla@unicesar.edu.co", $this->encrypt("1063969856")))->result();
 	}
 
-	public function register(){
-		$fecha = new DateTime();
-		$fecha = date('Y-m-d H:i:s',$fecha->getTimestamp());
-		$this->db->insert('Users', ["username" => "1063969856",
-			"password" => $this->users->encrypt("1063969856","1063969856"),
-			"email" => "candrescastilla@unicesar.edu.co",
-			"status" => 1,
-			"roles_id" => 5,
-			"created_at" => $fecha]
-		);
-	}
-
-	public function requestAccount($data = []){
-
-	}
-
 
 	public function recoveryPassword($username){
 		$query = $this->db->query($this->config->item("getEmail"), array($username,$username));
@@ -111,6 +95,54 @@ class Users extends CI_Model
 			default: $result = (filter_var($username, FILTER_VALIDATE_EMAIL)); break;
 		}
 		return $result;
+	}
+
+	public function getCount(){
+		$this->db->from("users");
+		return $this->db->count_all_results();
+	}
+
+	public function getRoles(){
+		$this->db->from("roles");
+		return $this->db->get()->result();
+	}
+
+	public function get($table = "",$select = "", $where = []){
+		$this->db->from($table);
+		$this->db->select($select);
+		$this->db->where($where);
+		$this->db->order_by("user_id", "asc");
+		return $this->db->get()->result();
+	}
+
+	public function update($where = [],$data = [],$table = "users"){
+		$this->db->where($where);
+		return $this->db->update($table,$data);
+	}
+
+	public function insert($table = "",$data = []){
+		return $this->db->insert($table,$data);
+	}
+
+	public function validate($data = [],$table = "users",$where = ["username","email"],$insert = true){
+		foreach ($data as $key => $value){
+			if(in_array($key,$where)){
+				$this->db->where([$key=>$value]);
+				$this->db->select($key);
+				if($this->db->get($table)->num_rows() > 0){
+					return ["error"=>"error {$value} ya existe","key"=>$key];
+				}
+			}
+		}
+		if($insert){
+			$this->db->insert($table,$data);
+			$this->db->insert("persons",["user_id"=>$this->db->insert_id()]);
+		}
+		return true;
+	}
+
+	public function getJefe(){
+		return $this->db->query("select p.person_id, u.email, CONCAT(p.first_name,' ',p.first_surname) as namePerson, u.email as emailPerson from users u inner join persons p on u.user_id = p.user_id where u.roles_id = 3")->result();
 	}
 
 }

@@ -141,9 +141,13 @@ class CI_Controller
 		return $data;
 	}
 
+	protected function getPost(){
+		return $_POST;
+	}
+
 	//send data to API
 
-	protected function menssage($data = [],$status = 0){
+	protected function menssage($data = [],$status = true){
 		switch ($status){
 			case true:
 				if(isset($data["success"])){
@@ -159,13 +163,14 @@ class CI_Controller
 		return $data;
 	}
 
-	protected function response($data = array(), $status = true){
-		!$status ?
-			http_response_code(404) :
-			http_response_code(200);
-		echo json_encode(["data"=>$data, "status" => $status]);
-		exit(0);
+	protected function response($data = array(), $status = true,$type = "application/json"){
+		return $this->output
+			->set_content_type($type)
+			->set_status_header((!$status) ? 404 : 200)
+			->set_output(json_encode(["data"=>$data, "status" => $status]));
 	}
+
+
 
 	protected function destroy(){
 		session_reset();

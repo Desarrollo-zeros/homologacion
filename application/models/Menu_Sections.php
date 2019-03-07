@@ -22,4 +22,8 @@ class Menu_Sections extends CI_Model
 	public function getSection(){
 		return $this->db->query($this->config->item("getSections"),array($this->session->roles_id))->result();
 	}
+
+	public function getSectionAll(){
+		return $this->db->query("select *from section")->result();
+	}
 }

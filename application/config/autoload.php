@@ -132,4 +132,4 @@ $autoload['language'] = array('user_lang','permission');
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array('Users','Validate','Persons','Matters','Careers', 'Menu_Sections');
+$autoload['model'] = array('Users','Validate','Persons','Matters','Careers', 'Menu_Sections',"Faculties","Pensums");

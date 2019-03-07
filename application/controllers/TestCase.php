@@ -6,7 +6,7 @@
  * Time: 9:18 AM
  */
 
-class testCase extends CI_Controller
+class TestCase extends CI_Controller
 {
 	public function __construct()
 	{
@@ -41,9 +41,9 @@ class testCase extends CI_Controller
 		$test = $data["warning_exits2"];
 		echo $this->unit->run((($this->Validate->validateLogin($test)["status"]) == false),'is_bool',$this->Validate->validateLogin($test)["error"],json_encode($test));
 		$test = $data["success_email"];
-		echo $this->unit->run((($this->Validate->validateLogin($test)["status"]) == true),'is_bool',$this->Validate->validateLogin($test)["success"],json_encode($test));
-		$test = $data["success_document"];
-		echo $this->unit->run((($this->Validate->validateLogin($test)["status"]) == true),'is_bool',$this->Validate->validateLogin($test)["success"],json_encode($test));
+		//echo $this->unit->run((($this->Validate->validateLogin($test)["status"]) == true),'is_bool',$this->Validate->validateLogin($test)["success"],json_encode($test));
+		//$test = $data["success_document"];
+		//echo $this->unit->run((($this->Validate->validateLogin($test)["status"]) == true),'is_bool',$this->Validate->validateLogin($test)["success"],json_encode($test));
 	}
 
 	public function recoveryPassword()
@@ -90,4 +90,6 @@ class testCase extends CI_Controller
 	public function test($password){
 		echo $this->Users->encrypt($password);
 	}
+
+
 }

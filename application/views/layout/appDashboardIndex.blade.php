@@ -40,7 +40,7 @@
 				left:0;
 				top:0;
 			}
-		}
+		}printSection
 	</style>
 @endsection <!--caebza -->
 @section('css')
@@ -58,6 +58,7 @@
 	<link rel="stylesheet" href="assets/dashboard/css/custom.css">
 
 @endsection <!--Css -->
+
 @section('header')
 	<header class="header">
 		<nav class="navbar">
@@ -72,7 +73,7 @@
 				<div class="navbar-holder d-flex align-items-center justify-content-between">
 					<!-- Navbar Header-->
 					<div class="navbar-header">
-						<!-- Navbar Brand --><a href="index.html" class="navbar-brand d-none d-sm-inline-block">
+						<!-- Navbar Brand --><a href="{{base_url(Dashboard::class)}}" class="navbar-brand d-none d-sm-inline-block">
 							<div class="brand-text d-none d-lg-inline-block"><span></span><strong>{{$title}}</strong></div>
 							<div class="brand-text d-none d-sm-inline-block d-lg-none"><strong>{{$title}}</strong></div></a>
 						<!-- Toggle Button--><a id="toggle-btn" href="#" class="menu-btn active"><span></span><span></span><span></span></a>
@@ -165,27 +166,27 @@
 					@if($row->type == "2")
 						<li>
 							@if(isset($row->father))
-
-								@php  $uri = ($row->url[0] == "#") ? $row->url : base_url($row->url) @endphp
+								@php  $uri = ($row->url[0] == "#" || $row->url == "javascript:void(0);") ? $row->url : base_url($row->url) @endphp
 
 								@if($row->father == "panel")
-									<a href="{{$uri}}" onclick="return {{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
+									<a href="{{$uri}}" onclick="{{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
 								@endif
 								@if($row->father == "panel-1" and $role_id == 1)
-									<a href="{{$uri}}" onclick="return {{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
+									<a href="{{$uri}}" onclick="{{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
 								@endif
 								@if($row->father == "panel-2" and $role_id == 2)
-									<a href="{{$uri}}" onclick="return {{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
+									<a href="{{$uri}}" onclick="{{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
 								@endif
 								@if($row->father == "panel-3" and $role_id == 3)
-									<a href="{{$uri}}" onclick="return {{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
+									<a href="{{$uri}}" onclick="{{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
 								@endif
 								@if($row->father == "panel-4" and $role_id == 4)
-									<a href="{{$uri}}" onclick="return {{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
+									<a href="{{$uri}}" onclick="{{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
 								@endif
 								@if($row->father == "panel-5" and $role_id == 5)
-									<a href="{{$uri}}" onclick="return {{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
+									<a href="{{$uri}}" onclick="{{$row->function}}" id="menu-panel-{{$row->menu_id}}"> <i class="{{$row->class}}"></i>{{$row->name}}</a>
 								@endif
+
 							@endif
 						</li>
 					@endif
@@ -230,44 +231,68 @@
 	<script src="assets/js/notify.js"></script>
 	<script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.5/jspdf.plugin.autotable.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+
 
 	<script>
 
+		var post = new Post('{{base_url(Dashboard::class)}}');
+		var url =  '{{base_url(Dashboard::class)}}';
 		var name = '{{$name}}';
 		var jefeDpto = '{{$jefeDpto}}';
 		var career = '{{$career}}';
 		var documents = '{{$persons->document}}';
 		var imgData = '{{$favicon}}';
 
-		var viewCesh = () => {
-			$(".dashboard-header").css("display","none");
-			$(".dashboard-Info").css("display","none");
-			$(".dashboard-Cesh").css("display","block");
-			$('#reporte-RH').css('display','none');
-		}
-
-		var modiI = () => {
-			$(".dashboard-header").css("display","none");
-			$(".dashboard-Cesh").css("display","none");
-			$(".dashboard-Info").css("display","block");
-			$('#reporte-RH').css('display','none');
-		}
-
-
-
-		$("#imgFile").change(function(evt){
-			archivo(evt);
+		$(document).ready(function () {
+			$(".bg_load").fadeOut("slow");
+			$(".wrapper").fadeOut("slow");
 		});
 
-		$("#chekChangePassword").change(function(){
-			if($("#chekChangePassword").prop('checked')){
-				$( "#password1" ).prop( "disabled", false );
-				$( "#password2" ).prop( "disabled", false );
-			}else{
-				$( "#password1" ).prop( "disabled", true );
-				$( "#password2" ).prop( "disabled", true );
+		function loadingAjax() {
+			$(".page").css("display","none");
+			$(".loaders").css("display","block");
+			$(".bg_load").fadeIn("slow");
+			$(".wrapper").fadeIn("slow");
+		}
+
+		function stopLoadingAjax() {
+			$(".bg_load").fadeOut("slow");
+			$(".wrapper").fadeOut("slow");
+			$(".loaders").css("display","none");
+			$(".page").css("display","block");
+		}
+
+		function cargarMateria(){
+			if(confirm("Las materias existenten seran reseteadas con los nuevos datos")){
+				confirmar("","Si aceptas los datos seran reseteados","/apiMatters",{},"error");
+				post.$data = undefined;
+				loadingAjax();
+				var refreshIntervalId = setInterval(function () {
+					if(post.$sendPost.getPost() != undefined){
+						stopLoadingAjax();
+						clearInterval(refreshIntervalId)
+						Swal.fire('Informacion!', post.$sendPost.getPost().data+' Materias Cargadas con exitos!', 'success')
+					}
+				},1000)
 			}
-		});
+		}
+		function cargarEstudiantes() {
+			if(confirm("Las Estudiantes existenten seran reseteadas con los nuevos datos")){
+				confirmar("","Si aceptas los datos de los estudiantes seran reseteados, esto puede tardar unos segundos","/apiUsers",{},"error");
+				post.$data = undefined;
+				var refreshIntervalId = setInterval(function () {
+					loadingAjax();
+					if(post.$sendPost.getPost() != undefined){
+						stopLoadingAjax();
+						clearInterval(refreshIntervalId);
+						clearInterval(c);
+						var data = post.$sendPost.getPost().data;
+						Swal.fire('Informacion!',data["users"]+" Estudiantes agregados y"+" "+data["notes"]+' Notas de estudiantes insertadas !', 'success')
+					}
+				},2000)
+			}
+		}
 
 	</script>
 @endsection <!--js -->

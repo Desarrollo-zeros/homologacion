@@ -235,9 +235,9 @@ $("#formPersons").on("submit",function (form) {
 	if($("#second_surname").val() != ""){
 		obj.second_surname = $("#second_surname").val();
 	}
-	if ($("#imgFile").val() != ""){
-		obj.img = $("#img").val();
-	}
+
+	obj.img = $("#img").val();
+
 	if($("#chekChangePassword").prop('checked')){
 		if($("#password1").val() != "" && $("#password1").val() == $("#password2").val()){
 			obj.password1 = $("#password1").val();
@@ -255,10 +255,14 @@ $("#formPersons").on("submit",function (form) {
 })
 
 
-var loaderTableRH = () =>{
+var loaderTableRH = (new_pensum_id = 0,person_id = 0) =>{
 	$('#reporte-RH').css('display','block');
 
-	sendPost("/dashboard/getFullMetter").then(data => {
+	var obj = {};
+	if(new_pensum_id > 0){
+		obj = {"new_pensum_id":new_pensum_id,"person_id":person_id};
+	}
+	sendPost("/dashboard/getFullMetter",obj).then(data => {
 		var string = '';
 		var data = data.data;
 		var x = 1;
@@ -285,8 +289,14 @@ function fecha() {
     return diasSemana[f.getDay()] + ", " + f.getDate() + " de " + meses[f.getMonth()] + " de " + f.getFullYear();
 }
 
-function tableReportH() {
-	sendPost("/dashboard/getFullMetter").then(data => {
+function tableReportH(new_pensum_id = 0,person_id = 0) {
+	var obj = {};
+
+	if(new_pensum_id > 0){
+		 obj = {"new_pensum_id":new_pensum_id,"person_id":person_id};
+	}
+
+	sendPost("/dashboard/getFullMetter",obj).then(data => {
 		var data = data.data;
 
 		var columns = [
@@ -298,14 +308,6 @@ function tableReportH() {
 			{title: "semestre", dataKey: "semesterN"},
 			//{title: "Nota", dataKey: "note"},
 		];
-		/*
-        var columns = [
-            {title: "Codigo Actual", dataKey: "codeA"},
-            {title: "Nombre Materia", dataKey: "nameA"},
-            {title: "Codigo Nuevo", dataKey: "codeN"},
-            {title: "Nombre Materia", dataKey: "nameN"},
-        ];*/
-
 
 		var doc = new jsPDF('l', 'mm', 'letter');
 		var totalPagesExp = "{total_pages_count_string}";
@@ -352,6 +354,1004 @@ function tableReportH() {
 		doc.text("Nombre "+jefeDpto, 180, 230 );
 		doc.text("Area de "+career, 180, 235 );
 
-		doc.save('table.pdf');
+		doc.save('homologacion.pdf');
 	});
 }
+
+
+function printElement(elem) {
+	var domClone = elem.cloneNode(true);
+
+	var $printSection = document.getElementById("printSection");
+
+	if (!$printSection) {
+		var $printSection = document.createElement("div");
+		$printSection.id = "printSection";
+		document.body.appendChild($printSection);
+	}
+
+	$printSection.innerHTML = "";
+	$printSection.appendChild(domClone);
+	window.print();
+}
+
+
+
+function btnRegistrar(table) {
+	$("[type=submit]").val("Registrar Datos");
+	$("[type=submit]").addClass("btn-success").removeClass("btn-info");
+
+	switch (table) {
+		case "users":{
+			$('#tableU').css('display','none');$('#formUsers').css('display','block')
+			$("#formUsers input").each(function () {
+				if(this.value != "Registrar Datos"){
+					$(this).val("");
+				}
+			});
+			break;
+		}
+	}
+
+}
+
+function viewGestionUser(){
+	$('.dashboard-Info').css('display','none');
+	$('#gestionUsers').css('display','block');
+	loaderTable("users");
+}
+
+function viewPensum(){
+	$('.dashboard-Info').css('display','none');
+	$('#gestionPensum').css('display','block');
+	loaderTable("pensum");
+}
+
+
+
+function loaderTable(table) {
+
+	switch (table) {
+		case "users":{
+			$('#formUsers').css('display','none');
+			$('#tableU').css('display','block');
+			post.$url = url+"/gestionAdministrador/1";
+			post.$sendPost.setPost();
+			var data = post.$sendPost.getPost().data;
+			var string = "";
+			for(var i in data){
+				string += "<tr>";
+				string += "<td>"+data[i].user_id+"</td>";
+				string += "<td>"+data[i].username+"</td>";
+				string += "<td>"+data[i].email+"</td>";
+				string += '<td><p class="estado-'+data[i].status+'"></p></td>';
+				string += "<td><a onclick='editar(\"users\","+JSON.stringify(data[i])+")' class='btn btn-info btn-sm'>Editar</a>&nbsp;&nbsp;<a class='btn btn-danger btn-sm' onclick='eliminarUsers("+data[i].user_id+")'>Eliminar</a></td>";
+				string += "</tr>";
+			}
+			$("#tableUsers").html(string);
+			break;
+		}
+		case "facultad":{
+			post.$url = url+"/gestionAdministrador/8";
+			post.$sendPost.setPost();
+			var data = post.$sendPost.getPost().data;
+			var string = "";
+			for(var i in data) {
+				string += "<tr>";
+				string += "<td>"+data[i].faculty_id+"</td>";
+				string += "<td>"+data[i].code+"</td>";
+				string += "<td>"+data[i].name+"</td>";
+				string += "<td><a onclick='editar(\"facultad\","+JSON.stringify(data[i])+")' class='btn btn-info btn-sm'>Editar</a>&nbsp;&nbsp;</td>";
+				string += "</tr>";
+			}
+			$("#facultadTable").html(string);
+			break;
+		}
+		case "carrera":{
+			post.$url = url+"/gestionAdministrador/11";
+			post.$sendPost.setPost();
+			var data = post.$sendPost.getPost().data;
+			var string = "";
+			for(var i in data) {
+				string += "<tr>";
+				string += "<td>"+data[i].career_id+"</td>";
+				string += "<td>"+data[i].codeCareer+"</td>";
+				string += "<td>"+data[i].nameCarrer+"</td>";
+				string += "<td>"+data[i].nameFaculty+"</td>";
+				string += "<td><a onclick='editar(\"carrera\","+JSON.stringify(data[i])+")' class='btn btn-info btn-sm'>Editar</a>&nbsp;&nbsp;</td>";
+				string += "</tr>";
+			}
+			$("#carreraTable").html(string);
+			break;
+		}
+		case "pensum" :{
+			post.$url = url+"/gestionAdministrador/14";
+			post.$sendPost.setPost();
+			var data = post.$sendPost.getPost().data;
+			var string = "";
+			for(var i in data) {
+				string += "<tr>";
+				string += "<td>"+data[i].pensum_id+"</td>";
+				string += "<td>"+data[i].codePensum+"</td>";
+				string += "<td>"+data[i].create_date+"</td>";
+				string += "<td>"+data[i].credit_numbers+"</td>";
+				string += "<td>"+data[i].detail+"</td>";
+				string += "<td>"+data[i].careerName+"</td>";
+				string += "<td><a onclick='editar(\"pensum\","+JSON.stringify(data[i])+")' class='btn btn-info btn-sm'>Editar</a>&nbsp;&nbsp;</td>";
+				string += "</tr>";
+			}
+			$("#pensumTable").html(string);
+			break;
+		}
+		case "jefes":{
+			post.$url = url+"/gestionAdministrador/17";
+			post.$sendPost.setPost();
+			var data = post.$sendPost.getPost().data;
+			var string = "";
+			for(var i in data) {
+				string += "<tr>";
+				string += "<td>"+data[i].teacher_id+"</td>";
+				string += "<td>"+data[i].namePerson+"</td>";
+				string += "<td>"+data[i].codePensum+"</td>";
+				string += "<td>"+data[i].nameFaculty+"</td>";
+				string += "<td>"+data[i].nameCareer+"</td>";
+				string += "<td><a onclick='eliminarJefe("+data[i].teacher_id+")' class='btn btn-danger btn-sm'>Eliminar</a></td>";
+				string += "</tr>";
+			}
+			$("#jefesTable").html(string);
+			break;
+		}
+		case "estudiantes":{
+			post.$url = url+"/gestionStudens/4";
+			post.$sendPost.setPost();
+			var data = post.$sendPost.getPost().data;
+			var string = "";
+			for(var i in data) {
+				var status = '';
+				string += "<tr>";
+				string += "<td>"+data[i].change_request_id+"</td>";
+				string += "<td>"+data[i].document+"</td>";
+				string += "<td>"+data[i].namePerson+"</td>";
+				string += "<td>"+data[i].code_current_pensum+"</td>";
+				string += "<td>"+data[i].code_new_pensum+"</td>";
+				if(data[i].status == 1){
+					string += "<td><p style='color:green;'>Hologado</p></td>";
+				}else{
+					status = "<a onclick='changeStatus("+data[i].change_request_id+","+data[i].student_id+","+data[i].new_pensum_id+")' class='btn btn-info btn-sm'>Homologar</a>&nbsp;&nbsp;";
+					string += "<td><p style='color:blue;'>En espera</p></td>";
+				}
+				string += "<td><a onclick='tableReportH("+data[i].new_pensum_id+","+data[i].person_id+");' class='btn btn-success btn-sm'>print</a>&nbsp;&nbsp;"+status+"<a onclick='eliminarHomologacion("+data[i].change_request_id+","+data[i].student_id+","+data[i].current_pensum_id+")' class='btn btn-danger btn-sm'>Eliminar</a></td>";
+				string += "<tr>";
+			}
+			$("#homoStudentsTable").html(string);
+			break;
+		}
+	}
+}
+function eliminarJefe(id) {
+	post.$url = url+"/gestionAdministrador/18";
+	post.$sendPost.setNpost({"teacher_id":id});
+	$.notify("Operacion realizada con exito","success");
+	loaderTable("jefes");
+}
+
+function editar(table,data) {
+	$("[type=submit]").val("Actualizar Datos");
+	$("[type=submit]").addClass("btn-info").removeClass("btn-success");
+	switch (table) {
+		case "users": {
+			$('#tableU').css('display','none');
+			$('#formUsers').css('display','block');
+			$("#formUsers input").each(function () {
+				if(data[this.id] != undefined){
+					$("#"+this.id).val(data[this.id]);
+				}
+			});
+			break;
+		}
+		case "facultad":{
+			console.log(data);
+			$("#facultadModal").modal();
+			$("#formFacultad input").each(function () {
+				if(data[this.id] != undefined){
+					$("#"+this.id).val(data[this.id]);
+				}
+			});
+			break;
+		}
+		case "carrera":{
+			$("#carreraModal").modal();
+			$("#formCarrera input").each(function () {
+				if(data[this.id] != undefined){
+					$("#"+this.id).val(data[this.id]);
+				}
+			});
+			break;
+		}
+		case "pensum":{
+			$("#pensumModal").modal();
+			$("#formPensum input").each(function () {
+				if(data[this.id] != undefined){
+					$("#"+this.id).val(data[this.id]);
+				}
+			});
+			$("#formPensum #detail").each(function () {
+				if(data[this.id] != undefined){
+					$("#"+this.id).text(data[this.id]);
+				}
+			});
+			break;
+		}
+	}
+}
+
+
+function eliminarUsers(id){
+	Swal.fire({
+		title: '<strong>Informacion! <u> Para Usuario</u></strong>',
+		type: 'info',
+		html: 'El usuario no sera borrado<b>,este estara desactivado</b>',
+		showCancelButton: true,
+		showCloseButton: true,
+		focusConfirm: false,
+		confirmButtonText: '<i class="fa fa-thumbs-up"></i>Eliminar',
+		confirmButtonAriaLabel: 'Thumbs up, great!',
+		cancelButtonText: '<i class="fa fa-thumbs-down"></i> Cancelar!',
+		cancelButtonAriaLabel: 'Thumbs down',
+		reverseButtons: true
+	}).then((result) => {
+		if (result.value) {
+			post.$url = url+"/gestionAdministrador/4/";
+			post.$sendPost.setNpost({"user_id":id});
+			if(post.$sendPost.getPost().data == true){
+				loaderTable("users");
+				Swal.fire('Usuario removido!', 'El estado del usuario ha sido modificado.', 'success')
+			}else{
+				$.notify("el usuario no puede ser removido","error")
+			}
+		}
+	});
+}
+
+
+function confirmar(table,mensaje,$url,$data,tipo = "info",error = "Ocurrio un error en la operacion",success = "Operacion realizada con exito") {
+	Swal.fire({
+		title: '<h6>Informacion</h6>',
+		type: tipo,
+		html: 'Operacion: <b>'+mensaje+'</b>',
+		showCancelButton: true,
+		showCloseButton: true,
+		focusConfirm: false,
+		confirmButtonText: '<i class="fa fa-thumbs-up"></i>Confirmar',
+		confirmButtonAriaLabel: 'Thumbs up, great!',
+		cancelButtonText: '<i class="fa fa-thumbs-down"></i> Cancelar!',
+		cancelButtonAriaLabel: 'Thumbs down',
+		reverseButtons: true
+	}).then((result) => {
+		if (result.value) {
+			post.$url = url+$url;
+			post.$sendPost.setNpost($data);
+			if(post.$sendPost.getPost().data.error == undefined){
+				if(post.$sendPost.getPost().data){
+					$.notify(success,"success");
+					loaderTable(table);
+				}else{
+					$.notify(error);
+				}
+			}else{
+				$.notify(post.$sendPost.getPost().data.error,"error");
+				$("#"+post.$sendPost.getPost().data.key).focus();
+				$("#"+post.$sendPost.getPost().data.key).css("border","1px solid red");
+			}
+		}
+	});
+}
+
+
+function changeSelect(value,data) {
+	for(var i in data){
+		if(value != data[i].pensum_id){
+			$("#selectPensumId2").html("<option value='"+data[i].pensum_id+"'>"+data[i].codePensum+"</option>")
+		}
+	}
+}
+
+function doSearch(text,table)
+{
+	var tableReg = document.getElementById(table);
+	var searchText = document.getElementById(text).value.toLowerCase();
+	var cellsOfRow="";
+	var found=false;
+	var compareWith="";
+
+	// Recorremos todas las filas con contenido de la tabla
+	for (var i = 1; i < tableReg.rows.length; i++)
+	{
+		cellsOfRow = tableReg.rows[i].getElementsByTagName('td');
+		found = false;
+		// Recorremos todas las celdas
+		for (var j = 0; j < cellsOfRow.length && !found; j++)
+		{
+			compareWith = cellsOfRow[j].innerHTML.toLowerCase();
+			// Buscamos el texto en el contenido de la celda
+			if (searchText.length == 0 || (compareWith.indexOf(searchText) > -1))
+			{
+				found = true;
+			}
+		}
+		if(found)
+		{
+			tableReg.rows[i].style.display = '';
+		} else {
+			// si no ha encontrado ninguna coincidencia, esconde la
+			// fila de la tabla
+			tableReg.rows[i].style.display = 'none';
+		}
+	}
+}
+
+
+function ecodeImg(element) {
+	var file = element.files[0];
+	var reader = new FileReader();
+
+	reader.onloadend = function() {
+		//$("#img").attr("href",reader.result);
+		$("#favicon").val(reader.result);
+		$("#imgFavicon").attr("src",reader.result);
+		console.log(reader.result);
+	}
+	reader.readAsDataURL(file);
+}
+
+
+
+
+
+function ecodeImg(element) {
+	var file = element.files[0];
+	var reader = new FileReader();
+
+	reader.onloadend = function() {
+		//$("#img").attr("href",reader.result);
+		$("#favicon").val(reader.result);
+		$("#imgFavicon").attr("src",reader.result);
+		console.log(reader.result);
+	}
+	reader.readAsDataURL(file);
+}
+
+
+var viewCesh = () => {
+	$(".dashboard-header").css("display","none");
+	$(".dashboard-Info").css("display","none");
+	$(".dashboard-Cesh").css("display","block");
+	$('#reporte-RH').css('display','none');
+}
+
+var modiI = () => {
+	$(".dashboard-header").css("display","none");
+	$(".dashboard-Cesh").css("display","none");
+	$(".dashboard-Info").css("display","block");
+	$("#gestionPerson").css("display","block");
+	$('#reporte-RH').css('display','none');
+}
+
+
+
+$("#imgFile").change(function(evt){
+	archivo(evt);
+});
+
+$("#chekChangePassword").change(function(){
+	if($("#chekChangePassword").prop('checked')){
+		$( "#password1" ).prop( "disabled", false );
+		$( "#password2" ).prop( "disabled", false );
+	}else{
+		$( "#password1" ).prop( "disabled", true );
+		$( "#password2" ).prop( "disabled", true );
+	}
+});
+
+
+$("#formUsers").on("submit",function (form) {
+	form.preventDefault();
+	var obj = new Object();
+	obj.username = $("#username").val();
+	obj.email = $("#email").val();
+	obj.password = $("#password").val();
+	obj.roles_id = $("#roles_id").val();
+	obj.status = $("#status").val();
+	$(".form-control").css("border","1px solid #dee2e6");
+	if($("#user_id").val() != ""){
+		form.preventDefault();
+		obj.user_id = $("#user_id").val();
+		confirmar("users","Actualizar Datos Personales","/gestionAdministrador/3",obj)
+
+	}else{
+		post.$url = url+"/gestionAdministrador/2";
+		post.$sendPost.setNpost(obj);
+
+		var estado = (post.$sendPost.getPost().data.error != undefined) ? 'error' : 'success';
+		if(estado == "success"){
+			$.notify("Operacion realizada con exito",estado);
+			loaderTable("users");
+		}else{
+			$.notify(post.$sendPost.getPost().data.error,estado);
+			$("#"+post.$sendPost.getPost().data.key).focus();
+			$("#"+post.$sendPost.getPost().data.key).css("border","1px solid red");
+		}
+
+	}
+});
+
+
+$("#formPrincipal").on("submit",function (form) {
+	form.preventDefault();
+	var obj = new Object();
+	obj.title = $("#title").val();
+	obj.description = $("#description").val();
+	obj.favicon = $("#favicon").val();
+	obj.smtp_user = $("#smtp_user").val();
+	obj.smtp_pass = $("#smtp_pass").val();
+	confirmar("","Cuidado, revisa bien los datos antes de seguir","/gestionAdministrador/5",obj);
+});
+
+$("#formDB").on("submit",function (form) {
+	form.preventDefault();
+	var obj = new Object();
+	obj.hostname = $("#hostname").val();
+	obj.username = $("#usernamedb").val();
+	obj.password = $("#passworddb").val();
+	obj.database = $("#database").val();
+	confirmar("","Cuidado, revisa bien los datos antes de seguir, cualquier mala edicion puede dañar el sistema","/gestionAdministrador/6",obj,"error");
+});
+
+function caragarDB() {
+	if(confirm("Esta opcion debes manejarla con mucho cuidado, cualquier mal edicion dañaria la conexion a la base de datos")){
+		$("form").css("display","none");
+		$("#formDB").css("display","block");
+		$("#dbConfig").css("overflow","hidden").css("height",0).css("height",$("#dbConfig").prop("scrollHeight")+"px");
+
+	}
+}
+
+function cargarPrincipal() {
+	$("form").css("display","none");
+	$("#formPrincipal").css("display","block");
+	$("#emailConfig").css("overflow","hidden").css("height",0).css("height",$("#emailConfig").prop("scrollHeight")+"px");
+}
+
+$("li").click(function () {
+	$("li").removeClass("active");
+	$(this).addClass("active");
+})
+
+$("#formFacultad").on("submit",function (form) {
+	form.preventDefault();
+	$("#formFacultad .form-control").css("border","1px solid #dee2e6");
+	if($("#faculty_id").val() == ""){
+		var obj = {"code":$("#code").val(),"name":$("#name").val()};
+		confirmar("facultad","Seguir operacion?","/gestionAdministrador/9",obj,"info");
+	}else{
+		var obj = {"faculty_id":$("#faculty_id").val(),"code":$("#code").val(),"name":$("#name").val()};
+		confirmar("facultad","Seguir operacion?","/gestionAdministrador/10",obj,"info");
+	}
+});
+
+$("#formCarrera").on("submit",function (form) {
+	form.preventDefault();
+	$("#formCarrera .form-control").css("border","1px solid #dee2e6");
+	if($("#career_id").val() == ""){
+		var obj = {"code":$("#codeCareer").val(),"name":$("#nameCarrer").val(),"faculty_id":$("#faculty").val()};
+		confirmar("carrera","Seguir operacion?","/gestionAdministrador/12",obj,"info");
+	}else{
+		var obj = {"career_id":$("#career_id").val(),"faculty_id":$("#faculty").val(),"code":$("#codeCareer").val(),"name":$("#nameCarrer").val()};
+		confirmar("carrera","Seguir operacion?","/gestionAdministrador/13",obj,"info");
+	}
+});
+
+$("#formPensum").on("submit",function (form) {
+	form.preventDefault();
+	var obj = new Object();
+	obj.code = $("#codePensum").val();
+	obj.create_date = $("#create_date").val();
+	obj.credit_numbers = $("#credit_numbers").val();
+	obj.detail = $("#detail").text();
+	obj.status = $("#statusPensum").val();
+	obj.career_id = $("#career").val();
+	if(obj.detail.length<5){
+		$.notify("detalle no puede ser menor a 10 caracteres");
+		$("#detail").focus();
+		$("#detail").css("border","1px solid red");
+		return false;
+	}
+	if($("#pensum_id").val() == ""){
+		confirmar("pensum","Seguir operacion?","/gestionAdministrador/15",obj,"info");
+	}else{
+		obj.pensum_id = $("#pensum_id").val();
+		confirmar("pensum","Seguir operacion?","/gestionAdministrador/16",obj,"info");
+	}
+});
+
+
+function viewFacultad(){
+	$('.dashboard-Info').css('display','none');
+	$('#gestionFacultad').css('display','block');
+	//$("#tableFacultad").css("visibility","visible");
+	loaderTable("facultad");
+}
+
+
+function viewCarrera(){
+	$('.dashboard-Info').css('display','none');
+	$('#gestionCarrera').css('display','block');
+	//$("#tableFacultad").css("visibility","visible");
+	loaderTable("carrera");
+}
+
+function btnRegisterFacultad() {
+	$("[type=submit]").val("Registrar Datos");
+	$("[type=submit]").addClass("btn-success").removeClass("btn-info");
+	$('#facultadModal').modal();
+	$('#formFacultad [type=text]').val('');
+	$('#formFacultad [type=hidden]').val('');
+}
+
+function btnRegisterCarrera() {
+	$("[type=submit]").val("Registrar Datos");
+	$("[type=submit]").addClass("btn-success").removeClass("btn-info");
+	$('#carreraModal').modal();
+	$('#formCarrera [type=text]').val('');
+	$('#formCarrera [type=hidden]').val('');
+}
+
+
+$("#jefeModal").on("submit",function (form) {
+	form.preventDefault();
+	var obj = {"person_id":$("#jefe_id").val(),"pensum_id":$("#jefe_pensum_id").val()};
+	confirmar("jefes","Seguir operacion?","/gestionAdministrador/19",obj,"info");
+});
+
+
+$("#option1").change(function (e) {
+	switch (this.value) {
+		case "1":
+		case "2":
+		case "3":
+			$("#option2").html("<option>Seleccione una opcion<option value='1'>Grafica Linea</option><option value='2'>Grafica de barra</option>");
+			break;
+		case "4":{
+			$("#option2").html("<option>Seleccione una opcion<option value='4'>Grafica de torta</option>");
+			break;
+		}
+		default :{
+			$("#option2").html("<option>Seleccione una opcion</option>");
+		}
+	}
+});
+
+$("#option2").change(function (e) {
+	var pensum_id = $("#selectPensumId").val();
+	switch (this.value) {
+		case "1":{
+			crearChar({"pensum_id":pensum_id,"chart":'line',"tipo":"1"});
+			break;
+		}
+		case "2":
+			crearChar({"pensum_id":pensum_id,"chart":'bar',"tipo":"2"});
+			break;
+		case "3":{
+			crearChar({"pensum_id":pensum_id,"chart":'bar',"tipo":"3"});
+			break;
+		}
+		case "4":{
+			$("#pensumModal").modal();
+			break;
+		}
+	}
+});
+
+function crearChar(datos) {
+	$("canvas").css("display", "none");
+	if ($("#option1").val() == "1") {
+		if (datos.tipo == "1" || datos.tipo == "2") {
+
+			if (datos.chart == "line") {
+				var a = [0];
+				var label = [
+					"0", "1 semestre", "2 semestre", "3 semestre", "4 semestre", "5 semestre",
+					"6 semestre", "7 semestre", "8 semestre", "9 semestre", "10 semestre"
+				];
+				var ctx = document.getElementById("lineal1").getContext('2d');
+				$("#lineal1").css("display", "block");
+			} else {
+				var a = [];
+				var label = [
+					"1 semestre", "2 semestre", "3 semestre", "4 semestre", "5 semestre",
+					"6 semestre", "7 semestre", "8 semestre", "9 semestre", "10 semestre"
+				];
+				$("#barra1").css("display", "block");
+				var ctx = document.getElementById("barra1").getContext('2d');
+			}
+
+			//ponderado vs Semestre
+			post.$url = url + "/gestionBoss/1";
+			post.$sendPost.setNpost({"pensum_id": datos.pensum_id});
+			var data = post.$sendPost.getPost().data;
+
+			for (var i in data) {
+				a.push(data[i].note);
+			}
+
+			var myChart = new Chart(ctx, {
+				type: datos.chart,
+				data: {
+					labels: label,
+					datasets: [{
+						label: 'Materis Vs Semestre',
+						data: a,
+						backgroundColor: [
+							'rgba(255, 99, 132, 0.2)',
+							'rgba(54, 162, 235, 0.2)',
+							'rgba(255, 206, 86, 0.2)',
+							'rgba(75, 192, 192, 0.2)',
+							'rgba(153, 102, 255, 0.2)',
+							'rgba(255, 159, 64, 0.2)'
+						],
+						borderColor: [
+							' rgba(255,99,132,1)',
+							'rgba(54, 162, 235, 1)',
+							'rgba(255, 206, 86, 1)',
+							'rgba(75, 192, 192, 1)',
+							'rgba(153, 102, 255, 1)',
+							'rgba(255, 159, 64, 1)'
+						],
+						borderWidth: 1
+					}]
+				},
+				options: {
+					scales: {
+						yAxes: [{
+							ticks: {
+								beginAtZero: true
+							}
+						}]
+					}
+				}
+			});
+		}
+	}
+	if ($("#option1").val() == "2") {
+
+		if (datos.chart == "line") {
+			var a = [0];
+			var label = [
+				"0", "1 semestre", "2 semestre", "3 semestre", "4 semestre", "5 semestre",
+				"6 semestre", "7 semestre", "8 semestre", "9 semestre", "10 semestre"
+			];
+			$("#lineal2").css("display", "block");
+			var ctx = document.getElementById("lineal2").getContext('2d');
+		} else {
+			var a = [];
+			var label = [
+				"1 semestre", "2 semestre", "3 semestre", "4 semestre", "5 semestre",
+				"6 semestre", "7 semestre", "8 semestre", "9 semestre", "10 semestre"
+			];
+			$("#barra2").css("display", "block");
+			var ctx = document.getElementById("barra2").getContext('2d');
+		}
+
+		//ponderado vs Semestre
+		post.$url = url + "/gestionBoss/2";
+		post.$sendPost.setNpost({"pensum_id": datos.pensum_id});
+		var data = post.$sendPost.getPost().data;
+
+		for (var i in data) {
+			a.push(data[i].note);
+		}
+		var myChart = new Chart(ctx, {
+			type: datos.chart,
+			data: {
+				labels: label,
+				datasets: [{
+					label: "Materias Ganada Vs Semestre",
+					borderColor: "#80b6f4",
+					pointBorderColor: "#80b6f4",
+					pointBackgroundColor: "#80b6f4",
+					pointHoverBackgroundColor: "#80b6f4",
+					pointHoverBorderColor: "#80b6f4",
+					pointBorderWidth: 10,
+					pointHoverRadius: 10,
+					pointHoverBorderWidth: 1,
+					pointRadius: 3,
+					fill: false,
+					borderWidth: 4,
+					data: a
+				}]
+			},
+			options: {
+				scales: {
+					yAxes: [{
+						ticks: {
+							fontColor: "rgba(0,0,0,0.5)",
+							fontStyle: "bold",
+							beginAtZero: true,
+							maxTicksLimit: 5,
+							padding: 20
+						},
+						gridLines: {
+							drawTicks: false,
+							display: false
+						}
+					}],
+					xAxes: [{
+						gridLines: {
+							zeroLineColor: "transparent"
+						},
+						ticks: {
+							padding: 20,
+							fontColor: "rgba(0,0,0,0.5)",
+							fontStyle: "bold"
+						}
+					}]
+				}
+			}
+		});
+	}
+	if ($("#option1").val() == "3") {
+		if (datos.tipo == "1" || datos.tipo == "2") {
+
+			// hacer algo aquí si el elemento existe
+
+			if (datos.chart == "line") {
+				var a = [0];
+				var label = [
+					"0", "1 semestre", "2 semestre", "3 semestre", "4 semestre", "5 semestre",
+					"6 semestre", "7 semestre", "8 semestre", "9 semestre", "10 semestre"
+				];
+				var ctx = document.getElementById("lineal3").getContext('2d');
+				$("#lineal3").css("display", "block");
+			} else {
+				var a = [];
+				var label = [
+					"1 semestre", "2 semestre", "3 semestre", "4 semestre", "5 semestre",
+					"6 semestre", "7 semestre", "8 semestre", "9 semestre", "10 semestre"
+				];
+				$("#barra3").css("display", "block");
+				var ctx = document.getElementById("barra3").getContext('2d');
+			}
+
+			var gradient1 = ctx.createLinearGradient(150, 0, 150, 300);
+			gradient1.addColorStop(0, 'rgba(133, 180, 242, 0.91)');
+			gradient1.addColorStop(1, 'rgba(255, 119, 119, 0.94)');
+
+			var gradient2 = ctx.createLinearGradient(146.000, 0.000, 154.000, 300.000);
+			gradient2.addColorStop(0, 'rgba(104, 179, 112, 0.85)');
+			gradient2.addColorStop(1, 'rgba(76, 162, 205, 0.85)');
+
+			//ponderado vs Semestre
+			post.$url = url + "/gestionBoss/3";
+			post.$sendPost.setNpost({"pensum_id": datos.pensum_id});
+			var data = post.$sendPost.getPost().data;
+
+			for (var i in data) {
+				a.push(data[i].note);
+			}
+			new Chart(ctx, {
+				type: datos.chart,
+				options: {
+					scales: {
+						xAxes: [{
+							display: true,
+							gridLines: {
+								color: '#eee'
+							}
+						}],
+						yAxes: [{
+							display: true,
+							gridLines: {
+								color: '#eee'
+							},
+							ticks: {
+								max: 5.0,
+								min: 0.0
+							},
+						}]
+					},
+				},
+				data: {
+					labels: label,
+					datasets: [
+						{
+							label: "Materias pedidas Vs Semestre",
+							backgroundColor: [
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2
+							],
+							hoverBackgroundColor: [
+								gradient1,
+								gradient1,
+								gradient1,
+								gradient1,
+								gradient1,
+								gradient1,
+								gradient1,
+								gradient1,
+								gradient1,
+								gradient1
+
+							],
+							borderColor: [
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2,
+								gradient2
+							],
+							borderWidth: 1,
+							data: a
+						},
+
+					]
+				}
+			});
+
+		}
+	}
+	if($("#option1").val() == "4"){
+		$("#barra4").css("display","block");
+		//ponderado vs Semestre
+		post.$url = url + "/gestionBoss/4";
+		post.$sendPost.setNpost({"pensum_id": datos.pensum_id,"document":datos.document});
+		var data = post.$sendPost.getPost().data;
+		var a = [];
+		var b = [];
+		for (var i in data) {
+			a.push(data[i].note);
+			b.push(data[i].name);
+		}
+		var oilCanvas = document.getElementById("barra4").getContext('2d');
+		Chart.defaults.global.defaultFontFamily = "Lato";
+		Chart.defaults.global.defaultFontSize = 18;
+		var oilData = {
+			labels:  ["1 semestre", "2 semestre", "3 semestre", "4 semestre", "5 semestre","6 semestre", "7 semestre", "8 semestre", "9 semestre", "10 semestre"],
+			datasets: [
+				{
+					data: a,
+					backgroundColor: [
+						"#FF6384",
+						"#63FF84",
+						"#84FF63",
+						"#8463FF",
+						"#6384FF",
+						"#eee",
+						"#bbb",
+						"#6542FF",
+						"#7894ff",
+						"#FF8932"
+					]
+				}]
+		};
+		var pieChart = new Chart(oilCanvas, {
+			type: 'pie',
+			data: oilData,
+			options: {
+				title: {
+					display: true,
+					text: 'Estudiante Nota Vs Semestre'
+				}
+			}
+		});
+	}
+
+}
+
+
+var searhStudent = (cedula) =>{
+	var obj = {"document":cedula};
+	post.$url = url+"/gestionStudens/3";
+	post.$sendPost.setNpost(obj);
+	var data = post.$sendPost.getPost().data;
+	if(data){
+		$("#viewReport").prop("disabled",false);
+		$("#current_pensum_id").val(data.current_pensum_id);
+		$("#new_pensum_id").val(data.new_pensum_id);
+		$("#code_current_pensum").val(data.code_current_pensum);
+		$("#code_new_pensum").val(data.code_new_pensum);
+		$("#person_id").val(data.person_id);
+		$("#student_id").val(data.student_id);
+		$("#documento_change")[0].setCustomValidity("");
+	}else{
+		$("#documento_change")[0].setCustomValidity("Docuemnto no existe");
+		$.notify("Docuemnto no existe");
+		$("#viewReport").prop("disabled",true);
+		$("#current_pensum_id").val("");
+		$("#new_pensum_id").val("");
+		$("#code_current_pensum").val("");
+		$("#code_new_pensum").val("");
+		$("#person_id").val("");
+		$("#student_id").val("");
+		$('#tableRH').css('display','none');
+	}
+};
+
+
+function solicitarHomologacion() {
+	confirmar("","Esta seguro que desea solicitar Una Homologacion?, luego de enviar la solicitud, el unico que puede cancelarla en el jefe de tu departamento","/gestionStudens/1",{},"question","tienes una solicitud en proceso","solictud de homologacion exitosa");
+}
+
+$("#formRequestChange").on("submit",function (form) {
+	form.preventDefault();
+	var obj = new Object();
+	obj.current_pensum_id = $("#current_pensum_id").val();
+	obj.new_pensum_id = $("#new_pensum_id").val();
+	obj.person_id = $("#person_id").val();
+	obj.student_id = $("#student_id").val();
+	obj.status = $("#status_change").val();
+	confirmar("estudiantes","Desea Hacer la solicitud de cambio para el documento "+$("#documento_change").val()+"?","/gestionStudens/1",obj,"question","el estudiante tiene una solicitud en proceso","solictud de homologacion exitosa");
+});
+
+function  eliminarHomologacion(id,student_id,pensum_id) {
+	confirmar("estudiantes","Desea Eliminar la homologacion de este pensum? a este estudiante?","/gestionStudens/6",{"change_request_id":id,"student_id":student_id,"pensum_id":pensum_id},"warning");
+}
+function  changeStatus(id,student_id,pensum_id) {
+	confirmar("estudiantes","Desea Cambiar el pensum a este estudiante?","/gestionStudens/5",{"change_request_id":id,"student_id":student_id,"pensum_id":pensum_id},"question");
+}
+
+
+function viewPensum(){
+	$('.dashboard-Info').css('display','none');
+	$('#gestionPensum').css('display','block');
+	loaderTable("pensum");
+}
+function btnRegisterPensum(){
+	$("[type=submit]").val("Registrar Datos");
+	$("[type=submit]").addClass("btn-success").removeClass("btn-info");
+	$('#pensumModal').modal();
+	$('#formPensum [type=text]').val('');
+	$('#formPensum [type=hidden]').val('');
+	$("#detail").css("overflow","hidden").css("height",20).css("height","50px");
+	$("#codePensum").css("border","1px solid #dee2e6;");
+	$("#detail").html("");
+}
+
+function divEdtiable(id) {
+	if($("#"+id).text().length>5){
+		$("#"+id).css("border","1px solid #dee2e6");
+	}else{
+		$("#"+id).css("border","1px solid red");
+	}
+	$("#"+id).css("overflow","hidden").css("height",0).css("height",$("#"+id).prop("scrollHeight")+"px");
+}
+
+function searhCode(value) {
+	if(value.length>8){
+		var obj = {"code":value};
+		post.$url = url+"/searchCodePensum";
+		post.$sendPost.setNpost(obj);
+		var data = post.$sendPost.getPost().data;
+		if(data == 1){
+			$("#codePensum")[0].setCustomValidity("el codigo de pensum ya existe");
+			$.notify("El codigo de pensum ya existe");
+			$("#codePensum").css("border","1px solid red");
+		}else{
+			$("#codePensum")[0].setCustomValidity("");
+			$("#codePensum").css("border","1px solid #dee2e6");
+		}
+	}
+}
+

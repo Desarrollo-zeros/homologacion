@@ -7,7 +7,7 @@
  */
 
 /*Errors*/
-$lang['error_users_invalido'] = 'usuario y/o contraseña invalidad';
+$lang['error_users_invalido'] = 'usuario y/o contraseña invalidad y/o el usuario esta inactivo';
 $lang["error_mail_username"] = '¡Formato Invalido! use email y/o documento de identidad';
 $lang["username_empty"] = '¡Su usuario esta vacio, por favor llenar el campo usuario!';
 $lang["password_empty"] = '¡Su usuario esta vacio, por favor llenar el campo usuario!';

@@ -13,7 +13,10 @@
 	"require": {
 		"php": ">=5.5",
 		"philo/laravel-blade": "3.*",
-		"coolpraz/php-blade": "^0.1.0"
+		"coolpraz/php-blade": "^0.1.0",
+	    "guzzlehttp/guzzle": "~6.0",
+	  	"pdepend/pdepend" : "2.4.1",
+	    "phpmd/phpmd" : "@stable"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

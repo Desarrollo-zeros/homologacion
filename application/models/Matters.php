@@ -13,9 +13,6 @@ class Matters extends  CI_Model
 		parent::__construct();
 	}
 
-	public function getPensum(){
-
-	}
 
 	public function getMattersArray($case = 1){
 		$lostMatter = [];
@@ -43,7 +40,8 @@ class Matters extends  CI_Model
 	}
 
 	public function getMissingMatterCount(){
-		return $this->db->query($this->config->item("getMissingMatterCounts"),array($this->session->user_id))->row("missingMatter");
+		$id = $this->session->currentPensum_id;
+		return $this->db->query($this->config->item("getMissingMatterCounts"),array($this->session->user_id,$id))->row("missingMatter");
 	}
 
 	public function getPondered($i,$data = []){
@@ -88,9 +86,36 @@ class Matters extends  CI_Model
 		return $semester;
 	}
 
-	public function getFullMetter()
+	public function getFullMetter($newPensum = null,$person_id = null)
 	{
-		$idPensum = $this->Persons->getNewPensum_id();
-		return $this->db->query($this->config->item("getFullMetters"),array($this->session->user_id,$idPensum))->result();
+		if($newPensum == null){
+			$idPensum = $this->Persons->getNewPensum_id();
+			return $this->db->query($this->config->item("getFullMetters"),array($this->session->person_id,$idPensum))->result();
+		}else{
+			return $this->db->query($this->config->item("getFullMetters"),array($person_id,$newPensum))->result();
+		}
 	}
+
+	public function getCount(){
+		$this->db->from("matters");
+		return $this->db->count_all_results();
+	}
+
+	public function getCharData($tipo =1,$pensum = 0){
+		switch ($tipo){
+			case 1:{
+				return $this->db->query($this->config->item("notaVsSemestre"),array($pensum))->result();
+			}
+			case 2:{
+				return $this->db->query($this->config->item("notaGVsSemestre"),array($pensum))->result();
+			}
+			case 3:{
+				return $this->db->query($this->config->item("notaPVsSemestre"),array($pensum))->result();
+			}
+			case 4:{
+				return $this->db->query($this->config->item("notaPVsSemestreM"),array($pensum,$this->input->post("document")))->result();
+			}
+		}
+	}
+
 }

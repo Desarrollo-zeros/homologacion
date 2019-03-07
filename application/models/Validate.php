@@ -182,4 +182,64 @@ class Validate extends CI_Model
 		return $v;
 	}
 
+	public function updateConfigDB(){
+		$raw = '<?php
+defined("BASEPATH") OR exit("No direct script access allowed");
+
+$active_group = "default";
+$query_builder = TRUE;
+
+$db["default"] = array(
+	"dsn"	=> "",
+	"hostname" => "'.$_POST["hostname"].'",
+	"username" => "'.$_POST["username"].'",
+	"password" => "'.$_POST["password"].'",
+	"database" => "'.$_POST["database"].'",
+	"dbdriver" => "mysqli",
+	"dbprefix" => "",
+	"pconnect" => FALSE,
+	"db_debug" => (ENVIRONMENT !== "production"),
+	"cache_on" => FALSE,
+	"cachedir" => "",
+	"char_set" => "utf8",
+	"dbcollat" => "utf8_general_ci",
+	"swap_pre" => "",
+	"encrypt" => FALSE,
+	"compress" => FALSE,
+	"stricton" => FALSE,
+	"failover" => array(),
+	"save_queries" => TRUE
+);';
+		return $raw;
+	}
+
+	public function updateConfig(){
+		$raw = '<?php
+					
+$config["title"] = "'.$_POST["title"].'";
+
+$config["description"]= "'.$_POST["description"].'";
+
+$config["favicon"]= "'.$_POST["favicon"].'";
+
+$config["bootstrap"] = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css";
+
+$config["index"] = "";
+
+$config["dashboard"] = "dashboard";
+
+$config["email"]=array(
+	"protocol"=>"smtp",
+	"smtp_host"=>"ssl://smtp.gmail.com",
+	"smtp_port"=>465,
+	"smtp_user"=>"'.$_POST["smtp_user"].'",
+	"smtp_pass"=>"'.$_POST["smtp_pass"].'",
+	"mailtype"=>"html",
+	"charset"=>"utf-8",
+	"newline"=>"\r\n",
+);';
+
+		return $raw;
+	}
+
 }

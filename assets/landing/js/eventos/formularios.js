@@ -11,7 +11,7 @@ $("#formLogin").on("submit",function (form) {
 		.then(data => {
 			$(".loader").css("display","none");
 			if(data.status){
-				localStorage.users_id = data.data["user"]["users_id"];
+				localStorage.users_id =  data.data["user"]["users_id"];
 				window.location.href =  data.data["user"]["url"];
 				console.log("bien");
 			}else{

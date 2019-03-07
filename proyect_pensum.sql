@@ -28,7 +28,7 @@ CREATE TABLE `careers`  (
   `faculty_id` int(11) NOT NULL,
   PRIMARY KEY (`career_id`) USING BTREE,
   INDEX `faculty_id`(`faculty_id`) USING BTREE,
-  CONSTRAINT `careers_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `facultys` (`faculty_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `careers_ibfk_1` FOREIGN KEY (`faculty_id`) REFERENCES `faculties` (`faculty_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
@@ -114,8 +114,8 @@ INSERT INTO `equivalences` VALUES (52, 121, 116);
 -- ----------------------------
 -- Table structure for facultys
 -- ----------------------------
-DROP TABLE IF EXISTS `facultys`;
-CREATE TABLE `facultys`  (
+DROP TABLE IF EXISTS `faculties`;
+CREATE TABLE `faculties`  (
   `faculty_id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(45) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `name` varchar(45) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
@@ -125,7 +125,7 @@ CREATE TABLE `facultys`  (
 -- ----------------------------
 -- Records of facultys
 -- ----------------------------
-INSERT INTO `facultys` VALUES (1, '1', 'facultad de ingenieria');
+INSERT INTO `faculties` VALUES (1, '1', 'facultad de ingenieria');
 
 -- ----------------------------
 -- Table structure for matters
@@ -591,7 +591,7 @@ INSERT INTO `section` VALUES (4, 'reporte-alumno', 4, 1, 1);
 -- ----------------------------
 DROP TABLE IF EXISTS `students`;
 CREATE TABLE `students`  (
-  `student_id` int(1) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL AUTO_INCREMENT,
   `semester` int(11) NOT NULL,
   `pondered` double(8, 2) NOT NULL,
   `person_id` int(11) NOT NULL,
@@ -604,6 +604,20 @@ CREATE TABLE `students`  (
   CONSTRAINT `students_ibfk_1` FOREIGN KEY (`pensum_id`) REFERENCES `pensums` (`pensum_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `students_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `persons` (`person_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
+
+DROP TABLE IF EXISTS `teachers`;
+CREATE TABLE `teachers` (
+	`teachers_id` int(11) NOT NULL AUTO_INCREMENT,
+	`person_id` int(11) NOT NULL,
+	`pensum_id` int(11) NOT NULL,
+	PRIMARY KEY (`teachers_id`) USING BTREE,
+	INDEX `pensum_id`(`pensum_id`) USING BTREE,
+	INDEX `person_id`(`person_id`) USING BTREE,
+	CONSTRAINT `teachers_ibfk_1` FOREIGN KEY (`pensum_id`) REFERENCES `pensums` (`pensum_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	CONSTRAINT `teachers_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `persons` (`person_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+)ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
+
 
 -- ----------------------------
 -- Records of students
