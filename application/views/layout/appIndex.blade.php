@@ -182,7 +182,7 @@
 								<img class="img-responsive" id="header-top-picture" src="https://2j9zen46cyp13k47i01s551m-wpengine.netdna-ssl.com/wp-content/themes/tooltester-child/images/front-page/hero/header-top.png" alt="website builder search" />
 							</div>
 							<div class="btn-wrapper">
-								@if(isset($this->session->user_id))
+								@if(isset($user_id))
 									<a href="#" onclick="window.location.href = 'http://zeros.com/dashboard';" class="btn btn-lg btn-primary">Panel</a>
 								@else
 									<a href="#" onclick="return modalLogin();" class="btn btn-lg btn-primary">Iniciar Sesíon</a>
