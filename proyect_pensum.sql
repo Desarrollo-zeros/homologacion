@@ -608,16 +608,17 @@ CREATE TABLE `students`  (
 
 DROP TABLE IF EXISTS `teachers`;
 CREATE TABLE `teachers` (
-	`teachers_id` int(11) NOT NULL AUTO_INCREMENT,
+	`teacher_id` int(11) NOT NULL AUTO_INCREMENT,
 	`person_id` int(11) NOT NULL,
 	`pensum_id` int(11) NOT NULL,
-	PRIMARY KEY (`teachers_id`) USING BTREE,
+	PRIMARY KEY (`teacher_id`) USING BTREE,
 	INDEX `pensum_id`(`pensum_id`) USING BTREE,
 	INDEX `person_id`(`person_id`) USING BTREE,
 	CONSTRAINT `teachers_ibfk_1` FOREIGN KEY (`pensum_id`) REFERENCES `pensums` (`pensum_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
 	CONSTRAINT `teachers_ibfk_2` FOREIGN KEY (`person_id`) REFERENCES `persons` (`person_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 )ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
 
+insert into teachers values(1,2,4);
 
 -- ----------------------------
 -- Records of students
@@ -666,5 +667,17 @@ WHERE p.user_id = 1 and n.note;
 END
 ;;
 delimiter ;
+
+
+
+DROP TABLE IF EXISTS `change_request`;
+create table change_request(
+	change_request_id int not null primary key,
+    `student_id` int(11) NOT NULL,
+	 status int not null DEFAULT 1,
+	 current_pensum_id int not null,
+	 new_pensum_id int not null,
+	 teacher_id int not null
+);
 
 SET FOREIGN_KEY_CHECKS = 1;

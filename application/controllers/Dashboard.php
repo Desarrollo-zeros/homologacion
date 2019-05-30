@@ -311,6 +311,7 @@ class Dashboard extends CI_Controller
 						"teacher_id" => $this->Persons->getJefe($this->session->currentPensum_id),
 						"current_pensum_id" => $this->session->currentPensum_id,
 						"new_pensum_id" => $this->Persons->getNewPensum_id(),
+						"status" => 1
 					];
 					return $this->response($this->Persons->requestChange($data));
 				}else{
